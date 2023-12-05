@@ -4,9 +4,6 @@
 	import { onMount } from 'svelte';
    import { selectedDistrict } from './districtStore.js';
 
-    import Tooltip from './tooltip/Tooltip.svelte';
-	import { tooltip } from './tooltip/tooltip.js';
-	import { tooltip as tooltipv1 } from './tooltip/tooltip.v1.js';
    
 	let newsData = [];
 	let newsData2 = [];
@@ -148,8 +145,51 @@
 
   onMount(() => {
     fetchData(); // Fetch data initially
-  });
+	// Create tooltip box
+	const tooltip = document.createElement('div');
+        tooltip.style.position = 'absolute';
+        tooltip.style.padding = '5px';
+        tooltip.style.background = 'lightgray';
+        tooltip.style.border = '1px solid black';
+        tooltip.style.borderRadius = '4px';
+        tooltip.style.display = 'none';
+        tooltip.style.pointerEvents = 'none'; // Ensure tooltip doesn't interfere with mouse events
+        tooltip.style.zIndex = '1000'; // Ensure the tooltip is above other elements
+        document.body.appendChild(tooltip);
+
+        // Get the coordinates and display them 
+        function showTooltip(event) {
+            tooltip.textContent = `X: ${event.pageX}, Y: ${event.pageY}`;
+            tooltip.style.left = `${event.pageX}px`;
+            tooltip.style.top = `${event.pageY}px`;
+            tooltip.style.display = 'block';
+        }
+
+        // Hide Tooltip
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        // Attach event listeners to all SVG elements
+        const svgs = document.querySelectorAll('svg');
+        svgs.forEach(svg => {
+            svg.addEventListener('mouseover', showTooltip);
+            svg.addEventListener('mouseout', hideTooltip);
+        });
+
+        // Cleanup function to remove event listeners when the component is destroyed
+        return () => {
+            svgs.forEach(svg => {
+                svg.removeEventListener('mouseover', showTooltip);
+                svg.removeEventListener('mouseout', hideTooltip);
+            });
+        };
+    });
+
+
 </script>
+
+
 
 <div class="container mx-auto">
 	<div class="mt-9 flex-row md:flex justify-around px-4">
